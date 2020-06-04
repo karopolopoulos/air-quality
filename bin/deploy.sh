@@ -48,7 +48,7 @@ main() {
   prepare
   package
   build_and_deploy
-  start
+  # start
 }
 
 main

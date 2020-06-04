@@ -90,13 +90,13 @@ def send_data_adafruit(pmt_2_5, pmt_10, aqi_2_5, aqi_10):
 
 def send_data_aws_iot(pmt_2_5, pmt_10, aqi_2_5, aqi_10):
     MQTT.publish(topic=PM_2_5_TOPIC, payload=json.dumps(
-        {"aqi": str(pmt_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+        {"aqi": int(pmt_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
     MQTT.publish(topic=PM_10_TOPIC, payload=json.dumps(
-        {"aqi": str(pmt_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+        {"aqi": int(pmt_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
     MQTT.publish(topic=AQI_2_5_TOPIC, payload=json.dumps(
-        {"aqi": str(aqi_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+        {"aqi": int(aqi_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
     MQTT.publish(topic=AQI_10_TOPIC, payload=json.dumps(
-        {"aqi": str(aqi_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+        {"aqi": int(aqi_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
 
 
 def main():
@@ -129,5 +129,9 @@ def main():
 
 
 while True:
-    main()
+    try:
+        main()
+    except:
+        print('Sensor failed to return data')
+        SENSOR = SDS011("/dev/ttyUSB0", use_query_mode=True)
     time.sleep(30)
