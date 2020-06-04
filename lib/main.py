@@ -1,24 +1,42 @@
 import time
 import os
 import aqi
+import json
 from datetime import datetime
 from sds011 import SDS011
 from dotenv import load_dotenv
 from Adafruit_IO import Client
-# from awsiot import mqtt_connection_builder
+from awsiot import mqtt_connection_builder
+from awscrt import mqtt, io
 
 load_dotenv()
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 LOG_FILE = '../data/air-quality.csv'
+IOT_CERT_FOLDER = '../certs'
+IOT_ENDPOINT = os.getenv('IOT_ENDPOINT')
 ADAFRUIT_IO_USERNAME = os.getenv('ADAFRUIT_IO_USERNAME')
 ADAFRUIT_IO_KEY = os.getenv('ADAFRUIT_IO_KEY')
-ADAFRUIT_PM_2_5_FEED = 'air-quality.melbourne-pm-two-five'
-ADAFRUIT_PM_10_FEED = 'air-quality.melbourne-pm-ten'
-ADAFRUIT_AQI_2_5_FEED = 'air-quality.melbourne-aqi-two-five'
-ADAFRUIT_AQI_10_FEED = 'air-quality.melbourne-aqi-ten'
+PM_2_5_TOPIC = 'air-quality.melbourne-pm-two-five'
+PM_10_TOPIC = 'air-quality.melbourne-pm-ten'
+AQI_2_5_TOPIC = 'air-quality.melbourne-aqi-two-five'
+AQI_10_TOPIC = 'air-quality.melbourne-aqi-ten'
 
-AIO = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
 SENSOR = SDS011("/dev/ttyUSB0", use_query_mode=True)
+AIO = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+
+event_loop_group = io.EventLoopGroup(1)
+host_resolver = io.DefaultHostResolver(event_loop_group)
+client_bootstrap = io.ClientBootstrap(event_loop_group, host_resolver)
+MQTT = mqtt_connection_builder.mtls_from_path(
+    endpoint=IOT_ENDPOINT,
+    cert_filepath=os.path.join(DIR_PATH, IOT_CERT_FOLDER, 'certificate.pem'),
+    pri_key_filepath=os.path.join(
+        DIR_PATH, IOT_CERT_FOLDER, 'private.pem'),
+    ca_filepath=os.path.join(
+        DIR_PATH, IOT_CERT_FOLDER, 'ca.pem'),
+    client_id='air-quality-pi',
+    client_bootstrap=client_bootstrap)
+MQTT.connect()
 
 
 def get_pm_data(n=3):
@@ -64,10 +82,21 @@ def save_log(pmt_2_5, pmt_10, aqi_2_5, aqi_10):
 
 
 def send_data_adafruit(pmt_2_5, pmt_10, aqi_2_5, aqi_10):
-    AIO.send(ADAFRUIT_PM_2_5_FEED, str(pmt_2_5))
-    AIO.send(ADAFRUIT_PM_10_FEED, str(pmt_10))
-    AIO.send(ADAFRUIT_AQI_2_5_FEED, str(aqi_2_5))
-    AIO.send(ADAFRUIT_AQI_10_FEED, str(aqi_10))
+    AIO.send(PM_2_5_TOPIC, str(pmt_2_5))
+    AIO.send(PM_10_TOPIC, str(pmt_10))
+    AIO.send(AQI_2_5_TOPIC, str(aqi_2_5))
+    AIO.send(AQI_10_TOPIC, str(aqi_10))
+
+
+def send_data_aws_iot(pmt_2_5, pmt_10, aqi_2_5, aqi_10):
+    MQTT.publish(topic=PM_2_5_TOPIC, payload=json.dumps(
+        {"aqi": str(pmt_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+    MQTT.publish(topic=PM_10_TOPIC, payload=json.dumps(
+        {"aqi": str(pmt_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+    MQTT.publish(topic=AQI_2_5_TOPIC, payload=json.dumps(
+        {"aqi": str(aqi_2_5)}), qos=mqtt.QoS.AT_LEAST_ONCE)
+    MQTT.publish(topic=AQI_10_TOPIC, payload=json.dumps(
+        {"aqi": str(aqi_10)}), qos=mqtt.QoS.AT_LEAST_ONCE)
 
 
 def main():
@@ -83,13 +112,20 @@ def main():
 
     print('')
     print('Sending data to AdaFruit...')
-    send_data_adafruit(pmt_2_5, pmt_10, aqi_2_5, aqi_10)
+    try:
+        send_data_adafruit(pmt_2_5, pmt_10, aqi_2_5, aqi_10)
+    except:
+        print('Unable to connect to AdaFruit...')
 
-    # print('')
-    # print('Sending data to AWS IoT...')
-    # send_data_aws_iot(pmt_2_5, pmt_10, aqi_2_5, aqi_10)
+    print('Sending data to AWS IoT...')
+    try:
+        send_data_aws_iot(pmt_2_5, pmt_10, aqi_2_5, aqi_10)
+    except:
+        print('Unable to connect to AWS IoT...')
 
+    print('')
     print('Sleeping...')
+    print('')
 
 
 while True:

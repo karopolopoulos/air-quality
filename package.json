@@ -3,5 +3,12 @@
   "version": "1.0.0",
   "description": "using iot to test air quality",
   "author": "karopolopoulos",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com:sasasavic82/belvedere.git"
+  },
+  "scripts": {
+    "deploy": "bash bin/deploy.sh"
+  }
 }

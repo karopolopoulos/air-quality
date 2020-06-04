@@ -41,7 +41,7 @@ build_and_deploy() {
 start() {
   echo "Starting service on raspberry pi..."
   ssh pi@raspberrypi.local "pkill python3 \
-    && python3 lib/main.py &"
+    && nohup python3 lib/main.py &"
 }
 
 main() {
