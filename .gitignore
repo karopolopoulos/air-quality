@@ -2,6 +2,7 @@
 .vscode
 certs
 build
+node_modules
 
 #files
 .env

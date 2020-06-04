@@ -11,6 +11,13 @@
       "region": "ap-southeast-2",
       "versionFunctions": true,
       "remoteFunctionData": null,
+      "environment": {
+        "ADAFRUIT_IO_USERNAME": "karopolopoulos",
+        "ADAFRUIT_IO_KEY": "aio_jgki35TbUSGrcuYxsQgMx4CxLNtD",
+        "IOT_ENDPOINT": "a16n4olk3pbt9k-ats.iot.ap-southeast-2.amazonaws.com",
+        "NOTIFICATION_EMAIL": "evankaropoulos@gmail.com",
+        "NOTIFICATION_PHONE_NUMBER": "+61421864815"
+      },
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "The AWS CloudFormation template for this Serverless application",
@@ -109,6 +116,105 @@
                 "Ref": "PiThing"
               }
             }
+          },
+          "SNSTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+              "DisplayName": "aqi-topic",
+              "Subscription": [
+                {
+                  "Protocol": "email",
+                  "Endpoint": "evankaropoulos@gmail.com"
+                },
+                {
+                  "Protocol": "sms",
+                  "Endpoint": "+61421864815"
+                }
+              ]
+            }
+          },
+          "SNSRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "iot.amazonaws.com"
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "air-quality-dev-sns-policy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "sns:Publish"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "Aqi25TopicRule": {
+            "Type": "AWS::IoT::TopicRule",
+            "Properties": {
+              "RuleName": "aqi_2_5_rule",
+              "TopicRulePayload": {
+                "Actions": [
+                  {
+                    "Sns": {
+                      "MessageFormat": "RAW",
+                      "RoleArn": {
+                        "Fn::GetAtt": "SNSRole.Arn"
+                      },
+                      "TargetArn": {
+                        "Ref": "SNSTopic"
+                      }
+                    }
+                  }
+                ],
+                "RuleDisabled": false,
+                "Sql": "SELECT aqi AS aqi2_5 FROM 'air-quality.melbourne-aqi-two-five' WHERE aqi > 50"
+              }
+            }
+          },
+          "Aqi10TopicRule": {
+            "Type": "AWS::IoT::TopicRule",
+            "Properties": {
+              "RuleName": "aqi_10_rule",
+              "TopicRulePayload": {
+                "Actions": [
+                  {
+                    "Sns": {
+                      "MessageFormat": "RAW",
+                      "RoleArn": {
+                        "Fn::GetAtt": "SNSRole.Arn"
+                      },
+                      "TargetArn": {
+                        "Ref": "SNSTopic"
+                      }
+                    }
+                  }
+                ],
+                "RuleDisabled": false,
+                "Sql": "SELECT aqi AS aqi10 FROM 'air-quality.melbourne-aqi-10' WHERE aqi > 50"
+              }
+            }
           }
         },
         "Outputs": {
@@ -187,6 +293,9 @@
         }
       }
     },
+    "plugins": [
+      "serverless-dotenv-plugin"
+    ],
     "pluginsData": {},
     "functions": {},
     "resources": {
@@ -231,6 +340,105 @@
               "Ref": "PiThing"
             }
           }
+        },
+        "SNSTopic": {
+          "Type": "AWS::SNS::Topic",
+          "Properties": {
+            "DisplayName": "aqi-topic",
+            "Subscription": [
+              {
+                "Protocol": "email",
+                "Endpoint": "evankaropoulos@gmail.com"
+              },
+              {
+                "Protocol": "sms",
+                "Endpoint": "+61421864815"
+              }
+            ]
+          }
+        },
+        "SNSRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "iot.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": "air-quality-dev-sns-policy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "sns:Publish"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "Aqi25TopicRule": {
+          "Type": "AWS::IoT::TopicRule",
+          "Properties": {
+            "RuleName": "aqi_2_5_rule",
+            "TopicRulePayload": {
+              "Actions": [
+                {
+                  "Sns": {
+                    "MessageFormat": "RAW",
+                    "RoleArn": {
+                      "Fn::GetAtt": "SNSRole.Arn"
+                    },
+                    "TargetArn": {
+                      "Ref": "SNSTopic"
+                    }
+                  }
+                }
+              ],
+              "RuleDisabled": false,
+              "Sql": "SELECT aqi AS aqi2_5 FROM 'air-quality.melbourne-aqi-two-five' WHERE aqi > 50"
+            }
+          }
+        },
+        "Aqi10TopicRule": {
+          "Type": "AWS::IoT::TopicRule",
+          "Properties": {
+            "RuleName": "aqi_10_rule",
+            "TopicRulePayload": {
+              "Actions": [
+                {
+                  "Sns": {
+                    "MessageFormat": "RAW",
+                    "RoleArn": {
+                      "Fn::GetAtt": "SNSRole.Arn"
+                    },
+                    "TargetArn": {
+                      "Ref": "SNSTopic"
+                    }
+                  }
+                }
+              ],
+              "RuleDisabled": false,
+              "Sql": "SELECT aqi AS aqi10 FROM 'air-quality.melbourne-aqi-10' WHERE aqi > 50"
+            }
+          }
         }
       },
       "Outputs": {}
@@ -240,7 +448,7 @@
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/air-quality/dev/1591100108809-2020-06-02T12:15:08.809Z",
+    "artifactDirectoryName": "serverless/air-quality/dev/1591278414385-2020-06-04T13:46:54.385Z",
     "artifact": ""
   }
 }
