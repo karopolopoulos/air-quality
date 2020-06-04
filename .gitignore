@@ -1,0 +1,8 @@
+#folders
+.vscode
+certs
+build
+
+#files
+.env
+.DS_Store
