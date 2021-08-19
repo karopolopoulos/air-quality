@@ -11,15 +11,15 @@ from awscrt import mqtt, io
 
 load_dotenv()
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
-LOG_FILE = '../data/air-quality.csv'
+LOG_FILE = '../data/air_quality.csv'
 IOT_CERT_FOLDER = '../certs'
 IOT_ENDPOINT = os.getenv('IOT_ENDPOINT')
 ADAFRUIT_IO_USERNAME = os.getenv('ADAFRUIT_IO_USERNAME')
 ADAFRUIT_IO_KEY = os.getenv('ADAFRUIT_IO_KEY')
-PM_2_5_TOPIC = 'air-quality.melbourne-pm-two-five'
-PM_10_TOPIC = 'air-quality.melbourne-pm-ten'
-AQI_2_5_TOPIC = 'air-quality.melbourne-aqi-two-five'
-AQI_10_TOPIC = 'air-quality.melbourne-aqi-ten'
+PM_2_5_TOPIC = 'air-quality.home-pm-2-5'
+PM_10_TOPIC = 'air-quality.home-pm-10'
+AQI_2_5_TOPIC = 'air-quality.home-aqi-2-5'
+AQI_10_TOPIC = 'air-quality.home-aqi-10'
 
 SENSOR = SDS011("/dev/ttyUSB0", use_query_mode=True)
 AIO = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
@@ -31,7 +31,7 @@ MQTT = mqtt_connection_builder.mtls_from_path(
     endpoint=IOT_ENDPOINT,
     cert_filepath=os.path.join(DIR_PATH, IOT_CERT_FOLDER, 'certificate.pem'),
     pri_key_filepath=os.path.join(
-        DIR_PATH, IOT_CERT_FOLDER, 'private.pem'),
+        DIR_PATH, IOT_CERT_FOLDER, 'private.key'),
     ca_filepath=os.path.join(
         DIR_PATH, IOT_CERT_FOLDER, 'ca.pem'),
     client_id='air-quality-pi',

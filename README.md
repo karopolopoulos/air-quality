@@ -2,4 +2,8 @@
 
 Using IoT to test air quality
 
-<img src="./docs/air-quality.drawio.svg">
+### TODO
+
+- Automate building raspberry pi images
+- Automate access and deployments to raspberry pi
+- Auto generate certificates

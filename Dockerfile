@@ -1,18 +1,11 @@
-FROM ubuntu:18.04
-
-RUN apt update \
-    && apt upgrade -y
-
-RUN apt update \
-    && apt upgrade -y \
-    && apt install -y python3 python3-pip build-essential libssl-dev libffi-dev python3-dev
+FROM python:3.8
 
 WORKDIR /air-quality
+
 COPY requirements.txt .
-COPY .env .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY certs certs
-COPY lib lib
+COPY src src
 
-RUN pip3 install -r requirements.txt
-
-CMD ["python3", "lib/main.py"]
+CMD ["python", "src/main.py"]

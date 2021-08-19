@@ -1,9 +1,9 @@
-#folders
 .vscode
-certs
+certs/certificate.pem
+certs/*.key
 build
-node_modules
-
-#files
 .env
 .DS_Store
+.tfvars
+*terraform*
+.tool-versions
