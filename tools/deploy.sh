@@ -20,7 +20,7 @@ prepare() {
 package() {
   echo "Packaging required files..."
 
-  cp -rT "${src_dir}/docker-compose.yml" "${src_dir}/.env" "${build_dir}/${project_name}"
+  cp -r "${src_dir}/docker-compose.yml" "${src_dir}/.env" "${src_dir}/certs" "${build_dir}/${project_name}/"
 
   cd "${build_dir}"
   zip -r "${project_name}.zip" "${project_name}"

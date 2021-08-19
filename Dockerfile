@@ -5,7 +5,6 @@ WORKDIR /air-quality
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY certs certs
 COPY src src
 
 CMD ["python", "src/main.py"]
