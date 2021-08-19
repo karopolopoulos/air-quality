@@ -5,7 +5,8 @@ services:
     build: .
     container_name: air-quality
     env_file: .env
+    restart: always
     volumes:
       - "./certs:/air-quality/certs"
     devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/SDS011:/dev/SDS011"

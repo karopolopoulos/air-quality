@@ -21,7 +21,7 @@ PM_10_TOPIC = 'air-quality.home-pm-10'
 AQI_2_5_TOPIC = 'air-quality.home-aqi-2-5'
 AQI_10_TOPIC = 'air-quality.home-aqi-10'
 
-SENSOR = SDS011("/dev/ttyUSB0", use_query_mode=True)
+SENSOR = SDS011("/dev/SDS011", use_query_mode=True)
 AIO = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
 
 event_loop_group = io.EventLoopGroup(1)
@@ -39,7 +39,7 @@ MQTT = mqtt_connection_builder.mtls_from_path(
 MQTT.connect()
 
 
-def get_pm_data(n=3):
+def get_pm_data(n=10):
     pmt_2_5 = 0
     pmt_10 = 0
 
@@ -133,5 +133,5 @@ while True:
         main()
     except:
         print('Sensor failed to return data')
-        SENSOR = SDS011("/dev/ttyUSB0", use_query_mode=True)
+        SENSOR = SDS011("/dev/SDS011", use_query_mode=True)
     time.sleep(30)
