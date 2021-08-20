@@ -81,7 +81,7 @@ resource "aws_iam_role" "iot_topc_role" {
 resource "aws_iot_topic_rule" "aqi_2_5_rule" {
   name        = "aqi_2_5_rule"
   enabled     = true
-  sql         = "SELECT aqi AS aqi2_5 FROM 'air-quality.home-aqi-2-5' WHERE aqi > 50"
+  sql         = "SELECT aqi AS aqi2_5 FROM 'air-quality.home-aqi-2-5' WHERE aqi > 200"
   sql_version = "2016-03-23"
 
   sns {
@@ -94,7 +94,7 @@ resource "aws_iot_topic_rule" "aqi_2_5_rule" {
 resource "aws_iot_topic_rule" "aqi_10_rule" {
   name        = "aqi_10_rule"
   enabled     = true
-  sql         = "SELECT aqi AS aqi10 FROM 'air-quality.home-aqi-10' WHERE aqi > 50"
+  sql         = "SELECT aqi AS aqi10 FROM 'air-quality.home-aqi-10' WHERE aqi > 200"
   sql_version = "2016-03-23"
 
   sns {
